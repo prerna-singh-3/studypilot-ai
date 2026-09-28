@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# StudyPilot AI
 
-## Getting Started
+> Your study plan, built with AI.
 
-First, run the development server:
+StudyPilot AI is an AI-powered study planning assistant that converts a student's subjects, exam date, available study time, and weak topics into a personalized study roadmap. It is designed for students who need a practical and structured preparation plan instead of manually deciding what to study each day.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Live Demo
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+https://studypilot-ai-khaki.vercel.app/
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## GitHub Repository
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+https://github.com/prerna-singh-3/studypilot-ai
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Problem
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Students often know what they need to study but struggle to decide:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- What should I study first?
+- Which weak topics need more attention?
+- How should I divide my available time?
+- What should I revise before the exam?
 
-## Deploy on Vercel
+StudyPilot AI addresses this by using an LLM to transform the student's inputs into a focused, day-by-day study plan.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Features
+
+- Personalized AI-generated study plans
+- Subject and weak-topic prioritization
+- Exam-date based planning
+- Daily study-time allocation
+- Structured learning, practice, and revision tasks
+- Input validation with Zod
+- API error handling and user-friendly failure states
+- Responsive interface for desktop and mobile
+- Accessible form controls and semantic HTML
+- Production deployment with Vercel
+- Automated unit/component tests with Vitest and Testing Library
+
+---
+
+## Tech Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- CSS
+- Google Gemini API
+- Zod
+- Vitest
+- Testing Library
+- Vercel
+- GitHub
+
+---
+
+## Architecture
+
+The application follows a simple frontend-to-server architecture:
+
+```text
+User
+  |
+  v
+StudyPilot UI
+  |
+  | POST /api/generate
+  v
+Next.js API Route
+  |
+  v
+Google Gemini API
+  |
+  v
+Structured AI Response
+  |
+  v
+Zod Validation
+  |
+  v
+Study Plan UI
