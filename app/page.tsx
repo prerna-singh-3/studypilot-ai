@@ -1,69 +1,304 @@
-import Image from "next/image";
+"use client";
+
+import { FormEvent, useState } from "react";
+import type { StudyPlan } from "@/lib/study-plan";
 
 export default function Home() {
+  const [subjects, setSubjects] = useState("");
+  const [examDate, setExamDate] = useState("");
+  const [studyHours, setStudyHours] = useState("");
+  const [weakTopics, setWeakTopics] = useState("");
+
+  const [plan, setPlan] = useState<StudyPlan | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function generatePlan(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setError("");
+    setPlan(null);
+
+    const subjectList = subjects
+      .split(",")
+      .map((subject) => subject.trim())
+      .filter(Boolean);
+
+    const weakTopicList = weakTopics
+      .split(",")
+      .map((topic) => topic.trim())
+      .filter(Boolean);
+
+    const hours = Number(studyHours);
+
+    if (subjectList.length === 0) {
+      setError("Please enter at least one subject.");
+      return;
+    }
+
+    if (!examDate) {
+      setError("Please select your exam date.");
+      return;
+    }
+
+    if (!studyHours || Number.isNaN(hours) || hours <= 0 || hours > 16) {
+      setError("Study hours must be between 1 and 16.");
+      return;
+    }
+
+    if (weakTopicList.length === 0) {
+      setError("Please enter at least one weak topic.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subjects: subjectList,
+          examDate,
+          dailyHours: hours,
+          weakTopics: weakTopicList,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to generate your study plan."
+        );
+      }
+
+      setPlan(data.plan);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="page-shell">
+      <section className="hero">
+        <div className="hero-glow glow-one" />
+        <div className="hero-glow glow-two" />
+
+        <div className="hero-content">
+          <div className="brand-pill">
+            <span className="brand-dot" />
+            STUDYPILOT AI
+          </div>
+
+          <p className="eyebrow">PERSONALIZED LEARNING, POWERED BY AI</p>
+
+          <h1>
+            Your study plan,
+            <br />
+            <span>built with AI.</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="hero-description">
+            Turn your subjects, exam date, available time, and weak topics
+            into a focused study roadmap tailored specifically for you.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section className="planner-section">
+        <div className="planner-card">
+          <div className="section-heading">
+            <div className="section-number">01</div>
+
+            <div>
+              <p className="eyebrow">YOUR INPUT</p>
+              <h2>Build your study plan</h2>
+              <p>
+                Give StudyPilot a few details and let AI organize your
+                preparation.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={generatePlan} className="planner-form">
+            <div className="form-group">
+              <label htmlFor="subjects">Subjects</label>
+
+              <input
+                id="subjects"
+                type="text"
+                value={subjects}
+                onChange={(event) => setSubjects(event.target.value)}
+                placeholder="Data Structures, DBMS, Digital Electronics"
+                required
+              />
+
+              <small>Separate multiple subjects with commas.</small>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="examDate">Exam date</label>
+
+                <input
+                  id="examDate"
+                  type="date"
+                  value={examDate}
+                  onChange={(event) => setExamDate(event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="studyHours">Study hours / day</label>
+
+                <input
+                  id="studyHours"
+                  type="number"
+                  min="1"
+                  max="16"
+                  step="1"
+                  value={studyHours}
+                  onChange={(event) => setStudyHours(event.target.value)}
+                  placeholder="4"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="weakTopics">Weak topics</label>
+
+              <input
+                id="weakTopics"
+                type="text"
+                value={weakTopics}
+                onChange={(event) => setWeakTopics(event.target.value)}
+                placeholder="Trees, SQL joins, Karnaugh maps"
+                required
+              />
+
+              <small>
+                Tell AI which topics need the most attention.
+              </small>
+            </div>
+
+            {error && (
+              <div className="error-message" role="alert">
+                <div className="error-icon">!</div>
+
+                <div>
+                  <strong>Unable to generate plan</strong>
+                  <p>{error}</p>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="generate-button"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="button-spinner" />
+                  Generating your plan...
+                </>
+              ) : (
+                <>
+                  Generate study plan
+                  <span className="button-arrow">→</span>
+                </>
+              )}
+            </button>
+          </form>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {loading && (
+        <section className="result-section" aria-live="polite">
+          <div className="loading-card">
+            <div className="loading-animation">
+              <span />
+              <span />
+              <span />
+            </div>
+
+            <h2>StudyPilot is thinking...</h2>
+
+            <p>
+              Gemini is analyzing your subjects, exam date, available
+              time, and weak topics.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {plan && !loading && (
+        <section className="result-section" aria-live="polite">
+          <div className="result-header">
+            <div>
+              <p className="eyebrow">02 · AI GENERATED</p>
+
+              <h2>Your personalized roadmap</h2>
+
+              <p className="result-summary">{plan.summary}</p>
+            </div>
+
+            <div className="ai-badge">
+              <span className="ai-badge-dot" />
+              AI PLAN
+            </div>
+          </div>
+
+          <div className="plan-grid">
+            {plan.days.map((day, dayIndex) => (
+              <article key={day.day} className="plan-card">
+                <div className="plan-card-top">
+                  <div className="day-number">
+                    {String(dayIndex + 1).padStart(2, "0")}
+                  </div>
+
+                  <span className="day-label">{day.day}</span>
+                </div>
+
+                <div className="plan-card-content">
+                  <p className="focus-label">FOCUS</p>
+
+                  <h3>{day.focus}</h3>
+
+                  <div className="task-list">
+                    {day.tasks.map((task, taskIndex) => (
+                      <div
+                        className="task-item"
+                        key={`${day.day}-${taskIndex}`}
+                      >
+                        <div className="task-check">✓</div>
+
+                        <p>{task}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <footer className="site-footer">
+        <span>StudyPilot AI</span>
+        <span>Personalized learning, simplified.</span>
+      </footer>
+    </main>
   );
 }
